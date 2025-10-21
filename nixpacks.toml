@@ -1,13 +1,18 @@
-# Archivo de configuración para Nixpacks
+# Nixpacks.toml
+providers = ["php"]
+
+[phases.setup]
+nixPkgs = [
+  "php83", "composer",
+  "php83Extensions.curl",
+  "php83Extensions.mbstring",
+  "php83Extensions.pdo_mysql",
+  "php83Extensions.opcache"
+]
 
 [phases.install]
-# Comando para instalar las dependencias de Composer
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
-[phases.build]
-# Comandos para preparar Laravel para producción
-cmds = ["php artisan key:generate --force", "php artisan config:cache", "php artisan route:cache", "php artisan view:cache"]
-
 [start]
-# Comando para iniciar el servidor web (Nginx y PHP-FPM)
-cmd = "nginx -c /app/nginx.conf & php-fpm"
+# Para test/arranque simple. Para prod serio, usa Apache/Nginx+php-fpm.
+cmd = "php -S 0.0.0.0:${PORT:-8000} -t public"
