@@ -1,20 +1,7 @@
-# Archivo de configuración para Nixpacks (v4 - Sin Start Command)
+# Archivo de configuración para Nixpacks (v5 - Mínimo)
 
 [phases.install]
 # 1. Instala las dependencias de PHP
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
-[phases.build]
-# 2. Prepara Laravel para producción
-cmds = [
-    "cp .env.example .env", # Asegura que .env exista
-    "php artisan key:generate --force",
-    "php artisan config:cache",
-    "php artisan route:cache",
-    "php artisan view:cache",
-    # Asegura permisos correctos
-    "chown -R nobody:nogroup /app/storage /app/bootstrap/cache",
-    "chmod -R 775 /app/storage /app/bootstrap/cache"
-]
-
-# NO HAY SECCIÓN [start]
+# NADA MÁS
