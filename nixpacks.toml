@@ -1,4 +1,4 @@
-# Archivo de configuración para Nixpacks (v3 - Con Start Command)
+# Archivo de configuración para Nixpacks (v4 - Sin Start Command)
 
 [phases.install]
 # 1. Instala las dependencias de PHP
@@ -17,7 +17,4 @@ cmds = [
     "chmod -R 775 /app/storage /app/bootstrap/cache"
 ]
 
-[start]
-# 3. Comando de arranque explícito para Nginx + PHP-FPM
-# Este es el comando estándar que Nixpacks usa internamente para Laravel
-cmd = "node /assets/scripts/prestart.mjs /assets/nginx.template.conf /nginx.conf && (php-fpm -y /assets/php-fpm.conf & nginx -c /nginx.conf)"
+# NO HAY SECCIÓN [start]
