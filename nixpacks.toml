@@ -1,7 +1,23 @@
-# Archivo de configuración para Nixpacks (v5 - Mínimo)
+# Archivo de configuración para Nixpacks (v6 - Final con Frontend)
 
 [phases.install]
-# 1. Instala las dependencias de PHP
-cmds = ["composer install --no-dev --optimize-autoloader"]
+# 1. Instala dependencias PHP y Node.js
+cmds = [
+    "composer install --no-dev --optimize-autoloader",
+    "npm install" # <-- ¡AÑADIDO! Instala Vite y otras dependencias JS
+]
 
-# NADA MÁS
+[phases.build]
+# 2. Compila frontend y prepara Laravel
+cmds = [
+    "npm run build", # <-- ¡AÑADIDO! Ejecuta Vite para compilar CSS/JS
+    "cp .env.example .env",
+    "php artisan key:generate --force",
+    "php artisan config:cache",
+    "php artisan route:cache",
+    "php artisan view:cache",
+    "chown -R nobody:nogroup /app/storage /app/bootstrap/cache",
+    "chmod -R 775 /app/storage /app/bootstrap/cache"
+]
+
+# NO HAY SECCIÓN [start] - Dejamos que Nixpacks use el arranque por defecto
