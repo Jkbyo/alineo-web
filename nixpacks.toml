@@ -1,13 +1,15 @@
-# Archivo de configuración para Nixpacks
+# Archivo de configuración para Nixpacks (Versión Corregida)
 
 [phases.install]
-# Comando para instalar las dependencias de Composer
+# 1. Instala las dependencias de PHP
 cmds = ["composer install --no-dev --optimize-autoloader"]
 
 [phases.build]
-# Comandos para preparar Laravel para producción
-cmds = ["php artisan key:generate --force", "php artisan config:cache", "php artisan route:cache", "php artisan view:cache"]
+# 2. Prepara el archivo de entorno .env
+# 3. Genera la clave de aplicación de Laravel
+# 4. Cachea la configuración para producción
+cmds = ["cp .env.example .env", "php artisan key:generate --force", "php artisan config:cache", "php artisan route:cache", "php artisan view:cache"]
 
-[start]
-# Comando para iniciar el servidor web (Nginx y PHP-FPM)
-cmd = "nginx -c /app/nginx.conf & php-fpm"
+# 3. NO añadimos la sección [start]
+# Dejamos que Nixpacks use su comando de arranque por defecto para Laravel,
+# que sabe cómo iniciar el servidor web correctamente.
