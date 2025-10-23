@@ -1,23 +1,28 @@
-# Archivo de configuración para Nixpacks (v6 - Final con Frontend)
+# Archivo de configuración para Nixpacks (v7 - Custom Nginx)
 
 [phases.install]
 # 1. Instala dependencias PHP y Node.js
 cmds = [
     "composer install --no-dev --optimize-autoloader",
-    "npm install" # <-- ¡AÑADIDO! Instala Vite y otras dependencias JS
+    "npm install"
 ]
 
 [phases.build]
-# 2. Compila frontend y prepara Laravel
+# 2. Compila frontend, prepara Laravel y copia nuestro Nginx config
 cmds = [
-    "npm run build", # <-- ¡AÑADIDO! Ejecuta Vite para compilar CSS/JS
+    "npm run build",
     "cp .env.example .env",
     "php artisan key:generate --force",
     "php artisan config:cache",
     "php artisan route:cache",
     "php artisan view:cache",
     "chown -R nobody:nogroup /app/storage /app/bootstrap/cache",
-    "chmod -R 775 /app/storage /app/bootstrap/cache"
+    "chmod -R 775 /app/storage /app/bootstrap/cache",
+    # COPIA NUESTRO NGINX.CONF PERSONALIZADO a la ubicación estándar
+    "cp docker/nginx.conf /etc/nginx/nginx.conf"
 ]
 
-# NO HAY SECCIÓN [start] - Dejamos que Nixpacks use el arranque por defecto
+[start]
+# 3. Comando de arranque explícito para PHP-FPM y Nginx USANDO NUESTRO ARCHIVO
+# Inicia PHP-FPM en segundo plano (&) y luego Nginx en primer plano usando el archivo copiado
+cmd = "php-fpm & nginx -c /etc/nginx/nginx.conf"
