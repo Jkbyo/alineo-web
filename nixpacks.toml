@@ -1,4 +1,18 @@
-# Archivo de configuración para Nixpacks (v7 - Custom Nginx)
+# Archivo de configuración para Nixpacks (v7 - Usando Artisan Serve)
+
+[phases.setup]
+# Pedimos nodejs_20 para que coincida con lo que pide Vite
+nixPkgs = [
+    '(php.withExtensions (pe: pe.enabled ++ []))',
+    'libmysqlclient',
+    'phpPackages.composer',
+    'nodejs_20',  # <-- ACTUALIZADO DE 18 A 20
+    'npm-9_x'
+]
+nixLibs = ['libmysqlclient']
+nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
+nixpkgsArchive = 'e24b4c09e963677b1beea49d411cd315a024ad3a'
+aptPkgs = ["curl", "wget"]
 
 [phases.install]
 # 1. Instala dependencias PHP y Node.js
@@ -8,7 +22,7 @@ cmds = [
 ]
 
 [phases.build]
-# 2. Compila frontend, prepara Laravel y copia nuestro Nginx config
+# 2. Compila frontend y prepara Laravel
 cmds = [
     "npm run build",
     "cp .env.example .env",
@@ -17,12 +31,9 @@ cmds = [
     "php artisan route:cache",
     "php artisan view:cache",
     "chown -R nobody:nogroup /app/storage /app/bootstrap/cache",
-    "chmod -R 775 /app/storage /app/bootstrap/cache",
-    # COPIA NUESTRO NGINX.CONF PERSONALIZADO a la ubicación estándar
-    "cp docker/nginx.conf /etc/nginx/nginx.conf"
+    "chmod -R 775 /app/storage /app/bootstrap/cache"
 ]
 
 [start]
-# 3. Comando de arranque explícito para PHP-FPM y Nginx USANDO NUESTRO ARCHIVO
-# Inicia PHP-FPM en segundo plano (&) y luego Nginx en primer plano usando el archivo copiado
-cmd = "php-fpm & nginx -c /etc/nginx/nginx.conf"
+# 3. Usa el servidor de Laravel en el puerto 8000, que es lo que Coolify espera
+cmd = "php artisan serve --host=0.0.0.0 --port=8000"
