@@ -1,12 +1,24 @@
-# Archivo de configuración para Nixpacks (v7 - Usando Artisan Serve)
+# Configuración de Nixpacks para Coolify
+#
+# IMPORTANTE: la configuración de producción NO sale de un fichero .env.
+# Hay que definir estas variables de entorno en Coolify:
+#   APP_NAME=Alineo
+#   APP_ENV=production
+#   APP_DEBUG=false
+#   APP_KEY=base64:...        (generar una sola vez con `php artisan key:generate --show`)
+#   APP_URL=https://tu-dominio
+#   APP_LOCALE=es
+#   LOG_LEVEL=warning
+#   SESSION_DRIVER=file
+#   CACHE_STORE=file
+#   QUEUE_CONNECTION=sync
 
 [phases.setup]
-# Pedimos nodejs_20 para que coincida con lo que pide Vite
 nixPkgs = [
     '(php.withExtensions (pe: pe.enabled ++ []))',
     'libmysqlclient',
     'phpPackages.composer',
-    'nodejs_20',  # <-- ACTUALIZADO DE 18 A 20
+    'nodejs_20',
     'npm-9_x'
 ]
 nixLibs = ['libmysqlclient']
@@ -15,25 +27,21 @@ nixpkgsArchive = 'e24b4c09e963677b1beea49d411cd315a024ad3a'
 aptPkgs = ["curl", "wget"]
 
 [phases.install]
-# 1. Instala dependencias PHP y Node.js
 cmds = [
-    "composer install --no-dev --optimize-autoloader",
+    "composer install --no-dev --optimize-autoloader --no-interaction",
     "npm install"
 ]
 
 [phases.build]
-# 2. Compila frontend y prepara Laravel
+# Las cachés de rutas y vistas no dependen de variables de entorno,
+# así que se pueden generar en el build.
 cmds = [
     "npm run build",
-    "cp .env.example .env",
-    "php artisan key:generate --force",
-    "php artisan config:cache",
     "php artisan route:cache",
     "php artisan view:cache",
-    "chown -R nobody:nogroup /app/storage /app/bootstrap/cache",
     "chmod -R 775 /app/storage /app/bootstrap/cache"
 ]
 
 [start]
-# 3. Usa el servidor de Laravel en el puerto 8000, que es lo que Coolify espera
-cmd = "php artisan serve --host=0.0.0.0 --port=8000"
+# config:cache se ejecuta al arrancar para que use las variables de Coolify.
+cmd = "php artisan config:cache && php artisan serve --host=0.0.0.0 --port=8000"
